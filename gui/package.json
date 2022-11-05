@@ -1,0 +1,40 @@
+{
+  "name": "naim-monitor-gui",
+  "version": "0.1.0",
+  "description": "NAIM Monitor GUI",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint --ext .js,.vue src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxxyz/naim-monitor.git"
+  },
+  "author": "Ivo Janssen <hello@ivo.la>",
+  "license": "MIT",
+  "devDependencies": {
+    "@appliedminds/eslint-config": "^1.3.0",
+    "eslint": "^8.26.0",
+    "eslint-plugin-vue": "^9.6.0",
+    "sass": "^1.55.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^3.2.0",
+    "album-art": "^2.0.2",
+    "randomcolor": "^0.6.2",
+    "vite": "^3.2.1",
+    "vue": "^3.2.41",
+    "vue-router": "^4.1.6",
+    "ws-plus": "^4.1.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@appliedminds",
+      "@appliedminds/eslint-config/vue"
+    ],
+    "globals": {
+      "__APP_VERSION__": true
+    }
+  }
+}

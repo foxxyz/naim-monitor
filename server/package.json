@@ -1,0 +1,30 @@
+{
+  "name": "naim-monitor-server",
+  "version": "0.1.0",
+  "description": "NAIM Monitor Server Process",
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxxyz/naim-monitor.git"
+  },
+  "author": "Ivo Janssen <hello@ivo.la>",
+  "license": "MIT",
+  "devDependencies": {
+    "@appliedminds/eslint-config": "^1.3.0",
+    "eslint": "^8.26.0"
+  },
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "fresh-console": "^1.0.4",
+    "html-entities": "^2.3.3",
+    "node-upnp": "^1.2.0",
+    "ws-plus": "^4.1.2",
+    "xml2js": "^0.4.23"
+  },
+  "eslintConfig": {
+    "extends": "@appliedminds"
+  }
+}
