@@ -31,7 +31,7 @@ class NAIMUPnPMonitor extends EventEmitter {
             console.log(item)
             const metaData = {
                 artist: item['upnp:artist'][0],
-                trackName: item['dc:title'][0],
+                trackName: item['dc:title'] ? item['dc:title'][0] : null,
                 trackLength: item.res[0].$.duration,
                 albumName: item['upnp:album'] ? item['upnp:album'][0] : null,
             }
