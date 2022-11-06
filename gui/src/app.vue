@@ -21,7 +21,7 @@ const version = __APP_VERSION__
 body
     background: #fff
     color: #000
-    font-size: 16px
+    font-size: 3vmin
     font-family: Roboto
 
 // Use up at least available space

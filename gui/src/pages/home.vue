@@ -1,5 +1,5 @@
 <template>
-    <main class="home" :style="{ background: `linear-gradient(to bottom, ${color}, #000)` }">
+    <main class="home" :style="{ backgroundColor: color }">
         <div class="album-art">
             <div class="album-art-wrapper">
                 <img v-if="albumArt" :src="albumArt">
@@ -34,13 +34,17 @@ const track = reactive({
 
 listen({
     async trackChange(info) {
-        loading.value = false
         const options = { size: 'large' }
         if (info.albumName) options.album = info.albumName
-        const src = await fetchAlbumArt(info.artist, options)
+        let src = await fetchAlbumArt(info.artist, options)
+        // Try without album if no results
+        if (src instanceof Error) {
+            src = await fetchAlbumArt(info.artist, { size: 'large' })
+        }
         albumArt.value = src
         Object.assign(track, info)
         color.value = randomColor()
+        loading.value = false
     }
 })
 
@@ -52,32 +56,38 @@ main.home
     justify-content: center
     align-items: center
     height: 100%
-    background: linear-gradient(to bottom, #40e0d0, #000)
+    transition: background 2s ease-in-out
     color: white
-    perspective: 100vw
-    font-size: 3vw
+    perspective: 200vmin
+    &:before
+        content: ''
+        position: absolute
+        width: 100%
+        height: 100%
+        top: 0
+        left: 0
+        background: linear-gradient(to bottom, transparent, #000)
 
     .album-art
-        animation: showoffX 2s ease-in-out infinite alternate
+        animation: showoffX 8.1s ease-in-out infinite alternate
         aspect-ratio: 1/1
         perspective: inherit
-        width: 80vw
+        width: 80vmin
         img
             width: 100%
             height: 100%
             display: block
             object-fit: cover
-            opacity: .5
+            opacity: .8
 
     .album-art-wrapper
         transform-style: preserve-3d
-        animation: showoffY 2.1s ease-in-out infinite alternate
+        animation: showoffY 8s ease-in-out infinite alternate
         display: flex
         justify-content: center
         align-items: center
         height: 100%
         background-color: #111
-
     .meta
         position: absolute
         height: 100%
@@ -91,21 +101,25 @@ main.home
     h1
         font-size: 2.5em
         letter-spacing: -.05em
+        font-weight: 900
         text-transform: uppercase
         line-height: .8em
         text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
     h2
         letter-spacing: -.05em
-        font-weight: 300
+        font-weight: 500
         text-transform: uppercase
-        margin-bottom: 1em
         font-size: 1.5em
-        line-height: .8em
         text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
 
     h4
         text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
         font-weight: 100
+        transform: translate(0, 2.5em)
+        white-space: nowrap
+        overflow: hidden
+        width: 100%
+        text-overflow: ellipsis
 
     p
         text-align: center
