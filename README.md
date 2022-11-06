@@ -1,7 +1,12 @@
 Naim Monitor
 ============
 
-Show metadata of audio playing on Naim devices (Mu-So, Mu-So QB).
+Display live information of audio currently playing on Naim devices (Mu-So, Mu-So QB).
+
+![Interface Example 1](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-1.jpg?raw=true)
+![Interface Example 2](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-2.jpg?raw=true)
+![Interface Example 3](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-3.jpg?raw=true)
+![Interface Example 3](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-4.jpg?raw=true)
 
 Requirements
 ------------
