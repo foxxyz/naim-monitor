@@ -41,6 +41,7 @@ listen({
         if (src instanceof Error) {
             src = await fetchAlbumArt(info.artist, { size: 'large' })
         }
+        if (src instanceof Error) src = null
         albumArt.value = src
         Object.assign(track, info)
         color.value = randomColor()

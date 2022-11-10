@@ -4,7 +4,8 @@ require('fresh-console')
 const { ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS } = require('argparse')
 const packageInfo = require('./package.json')
 
-const NAIMMonitor = require('./naim-upnp')
+const NaimMonitor = require('./naim-upnp')
+const NaimDiscover = require('./naim-discover')
 
 // new NAIMDevice(args.naim_host)
 
@@ -14,15 +15,20 @@ const parser = new ArgumentParser({ add_help: true, description: packageInfo.des
 parser.add_argument('-v', { action: 'version', version: packageInfo.version })
 parser.add_argument('--ws-host', { help: 'Websocket Host', default: '127.0.0.1' })
 parser.add_argument('--ws-port', { help: 'Websocket Port', default: 8090 })
-parser.add_argument('--naim-host', { help: 'IP/Host of Naim speaker to monitor', required: true, default: SUPPRESS })
+parser.add_argument('--naim-host', { help: 'IP/Host of Naim speaker to monitor (omit to autodiscover)', default: SUPPRESS })
 const args = parser.parse_args()
 
 const wsServer = new WSServer({ host: args.ws_host, port: args.ws_port })
 
-const monitor = new NAIMMonitor({ host: args.naim_host })
-monitor.start()
-// Emit track changes
-monitor.on('trackChange', wsServer.broadcast.bind(wsServer, 'trackChange'))
-wsServer.on('connect', client => {
-    client.send('trackChange', monitor.currentTrack)
+const browser = new NaimDiscover()
+browser.discover()
+browser.on('device', ({ name, modelName, modelNumber, address, upnpDescription }) => {
+    console.success(`Found "${name}" (${modelName} type ${modelNumber}) at ${address}`)
+    const monitor = new NaimMonitor({ host: upnpDescription })
+    monitor.start()
+    // Emit track changes
+    monitor.on('trackChange', wsServer.broadcast.bind(wsServer, 'trackChange'))
+    wsServer.on('connect', client => {
+        client.send('trackChange', monitor.currentTrack)
+    })
 })

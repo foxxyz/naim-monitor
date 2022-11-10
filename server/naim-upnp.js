@@ -3,12 +3,14 @@ const { decode } = require('html-entities')
 const { Parser: XMLParser } = require('xml2js')
 const EventEmitter = require('events')
 
+const { formatTime } = require('./util')
+
 class NAIMUPnPMonitor extends EventEmitter {
     constructor({ host }) {
         super()
         this.host = host
         this.client = new UPnPClient({
-            url: `http://${this.host}:8080/description.xml`
+            url: host
         })
         this.services = [
             { name: 'AV', urn: 'urn:upnp-org:serviceId:AVTransport' },
@@ -16,6 +18,7 @@ class NAIMUPnPMonitor extends EventEmitter {
             // { name: 'Render', urn: 'urn:upnp-org:serviceId:RenderingControl' },
         ]
         this.parser = new XMLParser()
+        this.currentTrack = {}
     }
     async connect() {
         const desc = await this.client.getDeviceDescription()
@@ -24,20 +27,24 @@ class NAIMUPnPMonitor extends EventEmitter {
     async onAVReceive({ name, value }) {
         // Other options:
         // - TransportState [PLAYING, STOPPED]
-        if (name === 'CurrentTrackMetaData') {
+        if (name === 'CurrentTrackMetaData' && value) {
             const xmlString = decode(value)
             const packet = await this.parser.parseStringPromise(xmlString)
             const item = packet['DIDL-Lite'].item[0]
-            console.log(item)
             const metaData = {
-                artist: item['upnp:artist'][0],
+                artist: item['upnp:artist'] ? item['upnp:artist'][0] : null,
                 trackName: item['dc:title'] ? item['dc:title'][0] : null,
-                trackLength: item.res[0].$.duration,
                 albumName: item['upnp:album'] ? item['upnp:album'][0] : null,
             }
-            this.currentTrack = metaData
-            this.emit('trackChange', metaData)
-            console.info(`Now Playing: ${metaData.artist} - ${metaData.trackName}\t\t\t\t(${metaData.trackLength}${metaData.album ? ` / ${metaData.album}` : ''})`)
+            Object.assign(this.currentTrack, metaData)
+            this.emit('trackChange', this.currentTrack)
+            if (!this.currentTrack.artist && !this.currentTrack.trackName) {
+                console.info('Stopped Playing.')
+            } else {
+                console.info(`Now Playing: ${this.currentTrack.artist} - ${this.currentTrack.trackName}\t\t\t\t(${this.currentTrack.trackLength ? formatTime(this.currentTrack.trackLength) : 'Multiroom'}${this.currentTrack.album ? ` / ${this.currentTrack.album}` : ''})`)
+            }
+        } else if (name === 'CurrentTrackDuration') {
+            this.currentTrack.trackLength = value
         }
     }
     onConnectionReceive(d) {

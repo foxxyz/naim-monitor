@@ -2,12 +2,7 @@ const { Socket } = require('net')
 const { Builder: XMLBuilder, Parser: XMLParser } = require('xml2js')
 
 const XMLStreamTransform = require('./parser')
-
-function formatTime(duration) {
-    const minutes = Math.floor(duration / 60)
-    const seconds = duration % 60
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
+const { formatTime } = require('./util')
 
 function parsePlayTime(map) {
     const item = map[0].item[0]
