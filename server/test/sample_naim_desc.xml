@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<root
+  xmlns="urn:schemas-upnp-org:device-1-0"
+  xmlns:ms="urn:microsoft-com:wmc-1-0"
+  xmlns:pnpx="http://schemas.microsoft.com/windows/pnpx/2005/11"
+  xmlns:df="http://schemas.microsoft.com/windows/2008/09/devicefoundation">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<device
+	  ms:X_MS_SupportsWMDRM="true">
+		<dlna:X_DLNADOC xmlns:dlna="urn:schemas-dlna-org:device-1-0">
+			DMR-1.50
+		</dlna:X_DLNADOC>
+		<pnpx:X_compatibleId>
+			MS_DigitalMediaDeviceClass_DMR_V001
+
+		</pnpx:X_compatibleId>
+		<pnpx:X_deviceCategory>
+			MediaDevices
+
+		</pnpx:X_deviceCategory>
+		<pnpx:X_hardwareId>
+			BridgecoCE2DM870_0xBD VEN_14E7&amp;DEV_0001&amp;REV_01
+
+		</pnpx:X_hardwareId>
+		<df:X_deviceCategory>
+			Multimedia.DMR
+
+		</df:X_deviceCategory>
+		<deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+		<friendlyName>Music room</friendlyName>
+		<manufacturer>Naim Audio Ltd.</manufacturer>
+		<manufacturerURL>http://www.naimaudio.com</manufacturerURL>
+		<modelDescription>Naim Mu-so all-in-one audio player</modelDescription>
+		<modelName>Mu-so</modelName>
+		<modelNumber>20-004-0007</modelNumber>
+		<modelURL>https://www.naimaudio.com/mu-so</modelURL>
+		<serialNumber>88FF88FF88FF</serialNumber>
+		<UDN>uuid:5F9EC1B3-ED59-79BB-4530-88FF88FF88FF</UDN>
+		<UPC>123456789012</UPC>
+		<iconList>
+			<icon>
+				<mimetype>image/jpeg</mimetype>
+				<width>48</width>
+				<height>48</height>
+				<depth>24</depth>
+				<url>/BCO_device_lrg_icon.jpg</url>
+			</icon>
+			<icon>
+				<mimetype>image/png</mimetype>
+				<width>120</width>
+				<height>120</height>
+				<depth>24</depth>
+				<url>/BCO_device_sm_icon.png</url>
+			</icon>
+			<icon>
+				<mimetype>image/png</mimetype>
+				<width>48</width>
+				<height>48</height>
+				<depth>24</depth>
+				<url>/BCO_device_lrg_icon.png</url>
+			</icon>
+			<icon>
+				<mimetype>text/html</mimetype>
+				<width>120</width>
+				<height>120</height>
+				<depth>24</depth>
+				<url>/</url>
+			</icon>
+		</iconList>
+		<serviceList>
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:RenderingControl</serviceId>
+				<SCPDURL>/RenderingControl/desc.xml</SCPDURL>
+				<controlURL>/RenderingControl/ctrl</controlURL>
+				<eventSubURL>/RenderingControl/evt</eventSubURL>
+			</service>
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:ConnectionManager</serviceId>
+				<SCPDURL>/ConnectionManager/desc.xml</SCPDURL>
+				<controlURL>/ConnectionManager/ctrl</controlURL>
+				<eventSubURL>/ConnectionManager/evt</eventSubURL>
+			</service>
+			<service>
+				<serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+				<serviceId>urn:upnp-org:serviceId:AVTransport</serviceId>
+				<SCPDURL>/AVTransport/desc.xml</SCPDURL>
+				<controlURL>/AVTransport/ctrl</controlURL>
+				<eventSubURL>/AVTransport/evt</eventSubURL>
+			</service>
+		</serviceList>
+		<presentationURL>http://127.0.0.1:80/1000/index.html</presentationURL>
+		<X_Rhapsody-Extension>
+			<deviceId>urn:rhapsody-real-com:device-id-1-0:rdk_dev_2:88FF88FF88FF</deviceId>
+			<deviceCapabilities>
+				<interactionPattern type="real-rhapsody-upnp-1-0"></interactionPattern>
+			</deviceCapabilities>
+		</X_Rhapsody-Extension>
+	</device>
+</root>
