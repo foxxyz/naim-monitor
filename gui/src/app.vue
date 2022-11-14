@@ -40,8 +40,8 @@ input
     padding: .5em
     font-size: .7em
 
-// Add font declarations here
-
-// Add global animations here
-
+@font-face
+    font-family: "Icons",
+    font-weight: 900
+    src: url(./fonts/icons.woff2) format("woff2")
 </style>

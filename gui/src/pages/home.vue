@@ -13,6 +13,9 @@
                 </div>
             </div>
         </div>
+        <div class="device">
+            {{ device.name }}
+        </div>
     </main>
 </template>
 
@@ -32,8 +35,18 @@ const track = reactive({
     albumName: 'Unknown Album'
 })
 
+const device = reactive({
+    name: ''
+})
+
 listen({
     async trackChange(info) {
+        // Skip if no artist given
+        if (!info.artist) return
+        // Same track called for possibly a different device - ignore
+        if (info.artist === track.artist && info.trackName === track.trackName) return
+
+        // Get album art
         const options = { size: 'large' }
         if (info.albumName) options.album = info.albumName
         let src = await fetchAlbumArt(info.artist, options)
@@ -45,6 +58,7 @@ listen({
         albumArt.value = src
         Object.assign(track, info)
         color.value = randomColor()
+        device.name = info.device
         loading.value = false
     }
 })
@@ -89,6 +103,24 @@ main.home
         align-items: center
         height: 100%
         background-color: #111
+    .device
+        position: absolute
+        right: 0
+        top: 0
+        padding: .5em
+        opacity: .3
+        font-size: .7em
+        font-weight: 300
+        text-transform: lowercase
+        background: rgba(0, 0, 0, .4)
+        border-bottom-left-radius: .5em
+        display: flex
+        align-items: center
+        &:before
+            content: '\f8df'
+            font-family: Icons
+            margin-right: .5em
+            display: block
     .meta
         position: absolute
         height: 100%
@@ -105,16 +137,15 @@ main.home
         font-weight: 900
         text-transform: uppercase
         line-height: .8em
-        text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
+        text-shadow: .05em .05em .1em rgba(0, 0, 0, .5)
     h2
         letter-spacing: -.05em
         font-weight: 500
         text-transform: uppercase
         font-size: 1.5em
-        text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
+        text-shadow: .05em .05em .1em rgba(0, 0, 0, .5)
 
     h4
-        text-shadow: .1em .1em .3em rgba(0, 0, 0, 1)
         font-weight: 100
         transform: translate(0, 2.5em)
         white-space: nowrap
