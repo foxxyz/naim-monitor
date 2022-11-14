@@ -20,6 +20,7 @@ class NaimDevice extends EventEmitter {
         this.descUrl = descUrl
         this.info = {}
         this.services = []
+        this.timers = {}
     }
     get description() {
         return `"${this.info.friendlyName[0]}" (${this.info.modelName[0]} type ${this.info.modelNumber[0]})`
@@ -60,27 +61,46 @@ class NaimDevice extends EventEmitter {
             this.currentTrack.trackLength = value
         }
     }
-    async subscribe({ receiver }) {
+    async subscribe({ receiver, subscriptionID }) {
+        console.log('subbing')
+
         const service = this.services.find(s => s.serviceType[0].includes('AVTransport'))
         // Make uPnP SUBSCRIBE call
         const origin = new URL(this.descUrl).origin
         const url = new URL(service.eventSubURL[0], origin)
+
+        const headers = {
+            HOST: url.host
+            //TIMEOUT: 'Second-300',
+        }
+
+        // Resubscribe
+        if (subscriptionID) {
+            headers.SID = subscriptionID
+        // New subscription
+        } else {
+            headers.CALLBACK = `<${receiver.address}/>`
+            headers.NT = 'upnp:event'
+        }
+
+        // Make request
         const res = await fetch(url, {
             method: 'SUBSCRIBE',
-            headers: {
-                HOST: url.host,
-                CALLBACK: `<${receiver.address}/>`,
-                NT: 'upnp:event',
-                TIMEOUT: 'Second-300',
-            }
+            headers
         })
-
         if (res.status !== 200) {
             throw new Error(`Unable to subscribe to ${url}, status code ${res.status}!`)
         }
-        const sid = res.headers.get('sid')
-        const timeout = res.headers.get('timeout')
-        receiver.on(sid, this.receive.bind(this))
+
+        // Get new subscription ID
+        if (!subscriptionID) {
+            subscriptionID = res.headers.get('sid')
+            receiver.on(subscriptionID, this.receive.bind(this))
+        }
+
+        const timeout = parseInt(res.headers.get('timeout').replace('Second-', ''))
+        // Automatically periodically resubscribe before the timeout expires
+        this.timers[subscriptionID] = setTimeout(this.subscribe.bind(this, { subscriptionID }), timeout * 1000 * 0.5)
     }
 }
 

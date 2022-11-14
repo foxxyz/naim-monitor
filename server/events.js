@@ -19,7 +19,13 @@ class EventReceiver extends EventEmitter {
     }
     async receive(req, buffer) {
         const serviceId = req.headers.sid
-        const packet = await this.parser.parseStringPromise(buffer.toString())
+        let packet
+        try {
+            packet = await this.parser.parseStringPromise(buffer.toString())
+        } catch (e) {
+            console.warn('Unable to decode: ', buffer.toString())
+            return
+        }
         const props = packet['e:propertyset']['e:property']
         const eventXML = props[0].LastChange[0]
         const event = await this.parser.parseStringPromise(eventXML)
