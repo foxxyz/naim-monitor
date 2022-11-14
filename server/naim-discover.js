@@ -2,6 +2,8 @@ const EventEmitter = require('events')
 const { Client: SSDPClient } = require('node-ssdp')
 const { Parser: XMLParser } = require('xml2js')
 
+const { formatTime } = require('./util')
+
 const xmlParser = new XMLParser()
 async function parseUpnpDescription(url) {
     const res = await fetch(url)
@@ -14,6 +16,7 @@ class NaimDevice extends EventEmitter {
     constructor({ address, descUrl }) {
         super()
         this.address = address
+        this.currentTrack = {}
         this.descUrl = descUrl
         this.info = {}
         this.services = []
@@ -34,7 +37,30 @@ class NaimDevice extends EventEmitter {
         if (!this.info.manufacturer) return
         return this.info.manufacturer[0]?.includes('Naim')
     }
-    async subscribe({ callbackUrl }) {
+    get name() {
+        return this.info.friendlyName[0]
+    }
+    async receive({ name, value }) {
+        if (name === 'CurrentTrackMetaData' && value) {
+            const packet = await xmlParser.parseStringPromise(value)
+            const item = packet['DIDL-Lite'].item[0]
+            const metaData = {
+                artist: item['upnp:artist'] ? item['upnp:artist'][0] : null,
+                trackName: item['dc:title'] ? item['dc:title'][0] : null,
+                albumName: item['upnp:album'] ? item['upnp:album'][0] : null,
+            }
+            Object.assign(this.currentTrack, metaData)
+            this.emit('trackChange', this.currentTrack)
+            if (!this.currentTrack.artist && !this.currentTrack.trackName) {
+                console.info('Stopped Playing.')
+            } else {
+                console.info(`Now Playing: ${this.currentTrack.artist} - ${this.currentTrack.trackName}\t\t\t\t(${this.currentTrack.trackLength ? this.currentTrack.trackLength : 'Multiroom'}${this.currentTrack.album ? ` / ${this.currentTrack.album}` : ''})`)
+            }
+        } else if (name === 'CurrentTrackDuration') {
+            this.currentTrack.trackLength = value
+        }
+    }
+    async subscribe({ receiver }) {
         const service = this.services.find(s => s.serviceType[0].includes('AVTransport'))
         // Make uPnP SUBSCRIBE call
         const origin = new URL(this.descUrl).origin
@@ -43,7 +69,7 @@ class NaimDevice extends EventEmitter {
             method: 'SUBSCRIBE',
             headers: {
                 HOST: url.host,
-                CALLBACK: `<${callbackUrl}/>`,
+                CALLBACK: `<${receiver.address}/>`,
                 NT: 'upnp:event',
                 TIMEOUT: 'Second-300',
             }
@@ -52,9 +78,9 @@ class NaimDevice extends EventEmitter {
         if (res.status !== 200) {
             throw new Error(`Unable to subscribe to ${url}, status code ${res.status}!`)
         }
-        console.log(res.headers)
-        const { sid, timeout } = res.headers
-        console.log(sid, timeout)
+        const sid = res.headers.get('sid')
+        const timeout = res.headers.get('timeout')
+        receiver.on(sid, this.receive.bind(this))
     }
 }
 
