@@ -4,8 +4,7 @@ require('fresh-console')
 const { ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS } = require('argparse')
 const packageInfo = require('./package.json')
 
-//const NaimMonitor = require('./naim-upnp')
-const { NaimDiscover } = require('./naim-discover')
+const { NaimDevice, NaimDiscover } = require('./naim-discover')
 const EventReceiver = require('./events')
 
 // new NAIMDevice(args.naim_host)
@@ -19,6 +18,19 @@ parser.add_argument('--ws-port', { help: 'Websocket Port', default: 8090 })
 parser.add_argument('--naim-host', { help: 'IP/Host of Naim speaker to monitor (omit to autodiscover)', default: SUPPRESS })
 const args = parser.parse_args()
 
+function connect(device, eventReceiver, wsServer) {
+    // Subscribe
+    device.subscribe({ receiver: eventReceiver })
+
+    // Emit track changes
+    device.on('trackChange', track => {
+        wsServer.broadcast('trackChange', { device: device.name, ...track })
+    })
+    wsServer.on('connect', client => {
+        client.send('trackChange', { device: device.name, ...device.currentTrack })
+    })
+}
+
 async function main() {
     const wsServer = new WSServer({ host: args.ws_host, port: args.ws_port })
 
@@ -26,22 +38,17 @@ async function main() {
     const eventReceiver = new EventReceiver()
     await eventReceiver.listen()
 
-    const browser = new NaimDiscover()
-    browser.discover()
-    browser.on('device', async device => {
-        console.success(`Found ${device.description} at ${device.address}`)
-
-        // Subscribe
-        device.subscribe({ receiver: eventReceiver })
-
-        // Emit track changes
-        device.on('trackChange', track => {
-            wsServer.broadcast('trackChange', { device: device.name, ...track })
+    if (args.naim_host) {
+        const device = new NaimDevice({ address: args.naim_host, descUrl: `http://${args.naim_host}:8080/description.xml` })
+        connect(device, eventReceiver, wsServer)
+    } else {
+        const browser = new NaimDiscover()
+        browser.discover()
+        browser.on('device', device => {
+            console.success(`Found ${device.description} at ${device.address}`)
+            connect(device, eventReceiver, wsServer)
         })
-        wsServer.on('connect', client => {
-            client.send('trackChange', { device: device.name, ...device.currentTrack })
-        })
-    })
+    }
 }
 
 main()
