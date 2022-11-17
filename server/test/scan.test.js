@@ -4,8 +4,6 @@ const { createServer } = require('http')
 
 const { NaimDiscover } = require('../naim-discover')
 
-//const delay = ms => new Promise(res => setTimeout(res, ms))
-
 class MockDevice {
     constructor(descFile) {
         this.descFile = descFile
