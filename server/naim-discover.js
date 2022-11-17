@@ -2,7 +2,8 @@ const EventEmitter = require('events')
 const { Client: SSDPClient } = require('node-ssdp')
 const { Parser: XMLParser } = require('xml2js')
 
-const { formatTime } = require('./util')
+const EventReceiver = require('./events')
+let GLOBAL_EVENT_RECEIVER
 
 const xmlParser = new XMLParser()
 async function parseUpnpDescription(url) {
@@ -61,10 +62,23 @@ class NaimDevice extends EventEmitter {
             this.currentTrack.trackLength = value
         }
     }
-    async subscribe({ receiver, subscriptionID }) {
-        console.log('subbing')
+    async subscribe({ subscriptionID, receiver } = {}) {
+        // Use global receiver if none given
+        if (!receiver) {
+            // Start the global receiver if not started yet
+            if (!GLOBAL_EVENT_RECEIVER) {
+                GLOBAL_EVENT_RECEIVER = new EventReceiver()
+                await GLOBAL_EVENT_RECEIVER.listen()
+            }
+            receiver = GLOBAL_EVENT_RECEIVER
+        }
 
+        // Ensure we know the device info
+        if (!this.info.friendlyName) await this.getInfo()
+
+        // Get the AVTransport service
         const service = this.services.find(s => s.serviceType[0].includes('AVTransport'))
+
         // Make uPnP SUBSCRIBE call
         const origin = new URL(this.descUrl).origin
         const url = new URL(service.eventSubURL[0], origin)
@@ -84,10 +98,14 @@ class NaimDevice extends EventEmitter {
         }
 
         // Make request
-        const res = await fetch(url, {
-            method: 'SUBSCRIBE',
-            headers
-        })
+        let res
+        try {
+            res = await fetch(url, { method: 'SUBSCRIBE', headers })
+        } catch (e) {
+            console.error(`Unable to request subscription at ${url}: ${e}. Trying again in 5 seconds...`)
+            this.timers.reconnect = setTimeout(this.subscribe.bind(this, { subscriptionID, receiver }), 5000)
+            return
+        }
         if (res.status !== 200) {
             throw new Error(`Unable to subscribe to ${url}, status code ${res.status}!`)
         }
@@ -101,6 +119,11 @@ class NaimDevice extends EventEmitter {
         const timeout = parseInt(res.headers.get('timeout').replace('Second-', ''))
         // Automatically periodically resubscribe before the timeout expires
         this.timers[subscriptionID] = setTimeout(this.subscribe.bind(this, { subscriptionID }), timeout * 1000 * 0.5)
+    }
+    unsubscribe() {
+        for(const subscriptionID in this.timers) {
+            clearTimeout(this.timers[subscriptionID])
+        }
     }
 }
 
@@ -130,4 +153,7 @@ class NaimDiscover extends EventEmitter {
     }
 }
 
-module.exports = { NaimDiscover }
+module.exports = {
+    NaimDevice,
+    NaimDiscover
+}
