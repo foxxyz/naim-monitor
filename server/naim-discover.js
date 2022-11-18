@@ -106,8 +106,17 @@ class NaimDevice extends EventEmitter {
             this.timers.reconnect = setTimeout(this.subscribe.bind(this, { subscriptionID, receiver }), 5000)
             return
         }
+        // Subscription not available
+        if (res.status === 412) {
+            console.error(`Unable to subscribe to ${url}, status code ${res.status}!. Trying again in 5 seconds...`)
+            // Do not reuse subscription ID
+            this.timers.reconnect = setTimeout(this.subscribe.bind(this, { receiver }), 5000)
+            return
+        }
         if (res.status !== 200) {
-            throw new Error(`Unable to subscribe to ${url}, status code ${res.status}!`)
+            console.error(`Unable to subscribe to ${url}, status code ${res.status}!. Trying again in 5 seconds...`)
+            this.timers.reconnect = setTimeout(this.subscribe.bind(this, { subscriptionID, receiver }), 5000)
+            return
         }
 
         // Get new subscription ID
