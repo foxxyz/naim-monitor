@@ -28,7 +28,13 @@ class EventReceiver extends EventEmitter {
         }
         const props = packet['e:propertyset']['e:property']
         const eventXML = props[0].LastChange[0]
-        const event = await this.parser.parseStringPromise(eventXML)
+        let event
+        try {
+            event = await this.parser.parseStringPromise(eventXML)
+        } catch (e) {
+            console.warn('Unable to decode: ', eventXML)
+            return
+        }
         const instanceEvent = event.Event.InstanceID[0]
         for(const name in instanceEvent) {
             // Skip attributes for instance (usually just "val=0")
