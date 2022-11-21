@@ -11,7 +11,7 @@ Display live information of audio currently playing on Naim devices (Mu-So, Mu-S
 Requirements
 ------------
 
- * Node 14+
+ * Node 18+ (uses native `fetch`)
 
 Installation
 ------------
