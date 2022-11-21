@@ -8,7 +8,7 @@ class EventReceiver extends EventEmitter {
     constructor() {
         super()
         this.parser = new XMLParser()
-        this.server = createServer(req => req.pipe(concat(this.receive.bind(this, req))))
+        this.server = createServer((req, res) => req.pipe(concat(this.receive.bind(this, req, res))))
     }
     get address() {
         const { address, port } = this.server.address()
@@ -17,7 +17,7 @@ class EventReceiver extends EventEmitter {
     listen() {
         return new Promise(res => this.server.listen(0, ipv4(), res))
     }
-    async receive(req, buffer) {
+    async receive(req, res, buffer) {
         const serviceId = req.headers.sid
         let packet
         try {
@@ -43,6 +43,10 @@ class EventReceiver extends EventEmitter {
             if (value === 'NOT_IMPLEMENTED') continue
             this.emit(serviceId, { name, value })
         }
+        res.end()
+    }
+    async stop() {
+        await new Promise(res => this.server.close(res))
     }
 }
 

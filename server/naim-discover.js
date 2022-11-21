@@ -22,6 +22,7 @@ class NaimDevice extends EventEmitter {
         this.info = {}
         this.services = []
         this.timers = {}
+        this.boundReceive = this.receive.bind(this)
     }
     get description() {
         return `"${this.info.friendlyName[0]}" (${this.info.modelName[0]} type ${this.info.modelNumber[0]})`
@@ -110,29 +111,38 @@ class NaimDevice extends EventEmitter {
         if (res.status === 412) {
             console.error(`Unable to subscribe to ${url}, status code ${res.status}!. Trying again in 5 seconds...`)
             // Do not reuse subscription ID
-            this.timers.reconnect = setTimeout(this.subscribe.bind(this, { receiver }), 5000)
+            this.timers.reconnect = { timer: setTimeout(this.subscribe.bind(this, { receiver }), 5000) }
             return
         }
         if (res.status !== 200) {
             console.error(`Unable to subscribe to ${url}, status code ${res.status}!. Trying again in 5 seconds...`)
-            this.timers.reconnect = setTimeout(this.subscribe.bind(this, { subscriptionID, receiver }), 5000)
+            this.timers.reconnect = { timer: setTimeout(this.subscribe.bind(this, { subscriptionID, receiver }), 5000) }
             return
         }
 
         // Get new subscription ID
         if (!subscriptionID) {
             subscriptionID = res.headers.get('sid')
-            receiver.on(subscriptionID, this.receive.bind(this))
+            receiver.on(subscriptionID, this.boundReceive)
         }
 
         const timeout = parseInt(res.headers.get('timeout').replace('Second-', ''))
         // Automatically periodically resubscribe before the timeout expires
-        this.timers[subscriptionID] = setTimeout(this.subscribe.bind(this, { subscriptionID }), timeout * 1000 * 0.5)
+        this.timers[subscriptionID] = {
+            receiver,
+            timer: setTimeout(this.subscribe.bind(this, { subscriptionID }), timeout * 1000 * 0.5)
+        }
     }
     unsubscribe() {
+        const tasks = []
         for(const subscriptionID in this.timers) {
-            clearTimeout(this.timers[subscriptionID])
+            const { receiver, timer } = this.timers[subscriptionID]
+            receiver.off(subscriptionID, this.boundReceive)
+            clearTimeout(timer)
+            // Check if receiver can be closed
+            if (!receiver.eventNames().length) tasks.push(receiver.stop())
         }
+        return Promise.all(tasks)
     }
 }
 
