@@ -1,0 +1,11 @@
+[Unit]
+Description=Naim Monitor Server
+
+[Service]
+ExecStart=/usr/bin/node /opt/naim-monitor/server/index.js --ws-host 0.0.0.0
+Restart=always
+Environment=NODE_ENV=production
+WorkingDirectory=/opt/naim-monitor/server
+
+[Install]
+WantedBy=multi-user.target
