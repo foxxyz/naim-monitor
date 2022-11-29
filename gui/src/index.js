@@ -16,7 +16,7 @@ const router = createRouter({ routes, history: createWebHistory() })
 app.use(router)
 
 // Connect to server
-const socketClient = createSocket('ws://localhost:8090')
+const socketClient = createSocket(`ws://${window.location.hostname}:8090`)
 app.use(socketClient)
 
 app.mount('body')
