@@ -48,7 +48,7 @@ echo "> Compiling GUI..."
 cd ../gui
 npm run build -- --mode $DEPLOY_MODE
 echo "> Copying GUI Artifacts and config..."
-scp -r dist deploy LICENSE $TARGET:$DEPLOY_DIR/gui
+scp -r dist deploy $TARGET:$DEPLOY_DIR/gui
 cd ..
 
 echo "> Copying server files..."
