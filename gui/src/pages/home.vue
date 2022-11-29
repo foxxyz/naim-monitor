@@ -49,12 +49,18 @@ listen({
         // Get album art
         const options = { size: 'large' }
         if (info.albumName) options.album = info.albumName
-        let src = await fetchAlbumArt(info.artist, options)
-        // Try without album if no results
-        if (src instanceof Error) {
-            src = await fetchAlbumArt(info.artist, { size: 'large' })
+        let src
+        // Try getting album art
+        try {
+            src = await fetchAlbumArt(info.artist, options)
+        } catch (e) {
+            // Try just artist if no results
+            try {
+                src = await fetchAlbumArt(info.artist, { size: 'large' })
+            } catch (e) {
+                console.warn(`No album art results for ${info.artist}!`)
+            }
         }
-        if (src instanceof Error) src = null
         albumArt.value = src
         Object.assign(track, info)
         color.value = randomColor()
