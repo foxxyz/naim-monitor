@@ -29,10 +29,31 @@ Installation
 Deployment
 ----------
 
+The included deploy script in `/deploy/deploy.sh` can automate deployment of steps 1/2 below:
+
+```
+./deploy/deploy.sh -t <machine_ip>
+```
+
 ### GUI
 
 1. Compile: `npm run build`
-2. Upload contents of `dist` to a directory accessible by your web server.
+2. Upload contents of `dist` to a directory accessible by your web server (recommended: `/opt/naim-monitor/gui/dist`).
+3. (For nginx users) Symlink nginx config: `ln -s /opt/naim-monitor/gui/deploy/nginx.conf /etc/nginx/sites-enabled/naim-monitor.conf`
+4. (For nginx users) Reload nginx: `systemctl reload nginx`
+
+### Server
+
+1. Copy or rsync server files to your server of choice (recommended path: `/opt/naim-monitor/server`)
+
+#### Systemd Setup
+
+A systemd service is included for automatic execution and monitoring.
+
+1. Enable service: `systemctl enable /opt/naim-monitor/server/deploy/naim-monitor.service`
+2. Start service: `systemctl start naim-monitor`
+
+In case of issues, check the logs with `journalctl -u naim-monitor`
 
 License
 -------
