@@ -19,7 +19,7 @@ const version = __APP_VERSION__
 
 // Set default color/background/font-size on root
 body
-    background: #fff
+    background: #40e0d0
     color: #000
     font-size: 3vmin
     font-family: Roboto

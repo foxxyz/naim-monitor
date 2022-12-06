@@ -1,5 +1,5 @@
 <template>
-    <main class="home" :style="{ backgroundColor: color }">
+    <main class="home">
         <div class="album-art">
             <div class="album-art-wrapper">
                 <img v-if="albumArt" :src="albumArt">
@@ -27,7 +27,6 @@ import { listen } from 'ws-plus/vue'
 
 const loading = ref(true)
 const albumArt = ref()
-const color = ref('#40e0d0')
 const track = reactive({
     artist: 'Unknown Artist',
     trackName: 'Unknown Track',
@@ -63,9 +62,10 @@ listen({
         }
         albumArt.value = src
         Object.assign(track, info)
-        color.value = randomColor()
         device.name = info.device
         loading.value = false
+        // Set body background so it works with Apple's apple-mobile-web-app-status-bar-style
+        document.body.style.backgroundColor = randomColor()
     }
 })
 
