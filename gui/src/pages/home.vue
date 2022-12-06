@@ -22,7 +22,7 @@
 <script setup>
 import fetchAlbumArt from 'album-art'
 import randomColor from 'randomcolor'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { listen } from 'ws-plus/vue'
 
 const loading = ref(true)
@@ -67,6 +67,11 @@ listen({
         device.name = info.device
         loading.value = false
     }
+})
+
+// Update title on track change
+watch(track, ({ artist, trackName }) => {
+    document.title = `${trackName} - ${artist} 🎵`
 })
 
 </script>
