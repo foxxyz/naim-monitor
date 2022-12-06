@@ -1,5 +1,16 @@
 {
     "short_name": "Now Playing",
     "name": "Now Playing on Naim",
-    "display": "standalone"
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "favicon.ico",
+            "sizes": "any"
+        }
+    ]
 }
