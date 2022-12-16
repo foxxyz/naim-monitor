@@ -33,7 +33,6 @@
     "html-entities": "^2.3.3",
     "network-address": "^1.1.2",
     "node-ssdp": "^4.0.1",
-    "node-upnp": "^1.2.0",
     "ws-plus": "^4.1.2",
     "xml2js": "^0.4.23"
   },
