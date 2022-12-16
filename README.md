@@ -1,12 +1,19 @@
 Naim Monitor
 ============
 
-Display live information of audio currently playing on Naim devices (Mu-So, Mu-So QB).
+Display live information of audio currently playing on Naim Mu-So devices.
 
 ![Interface Example 1](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-1.jpg?raw=true)
 ![Interface Example 2](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-2.jpg?raw=true)
 ![Interface Example 3](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-3.jpg?raw=true)
 ![Interface Example 3](https://github.com/foxxyz/naim-monitor/blob/main/docs/example-4.jpg?raw=true)
+
+Supported Naim speakers:
+
+ * Mu-So (1st Generation) 
+ * Mu-So QB (1st Generation)
+
+_Note: This is an unofficial library and not supported or endorsed by Naim Audio Ltd_
 
 Requirements
 ------------
@@ -19,7 +26,7 @@ Installation
 ### Server
 
 1. Install dependencies: `npm install`
-2. Run: `./index.js --naim-host <speaker_ip>`
+2. Run: `./index.js` (or target a specific speaker with `./index.js --naim-host <ip_or_host>`)
 
 ### GUI
 
