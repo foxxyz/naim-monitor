@@ -4,7 +4,7 @@ require('fresh-console')
 const { ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS } = require('argparse')
 const packageInfo = require('./package.json')
 
-const { NaimDevice, NaimDiscover } = require('./naim-discover')
+const { Discovery } = require('./discover')
 const EventReceiver = require('./events')
 
 // new NAIMDevice(args.naim_host)
@@ -38,7 +38,7 @@ async function main() {
     const eventReceiver = new EventReceiver()
     await eventReceiver.listen()
 
-    const browser = new NaimDiscover()
+    const browser = new Discovery()
     browser.discover()
     browser.on('device', device => {
         if (args.naim_host && args.naim_host !== device.address) return

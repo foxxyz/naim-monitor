@@ -1,5 +1,4 @@
 const EventEmitter = require('events')
-const { Client: SSDPClient } = require('node-ssdp')
 const { Parser: XMLParser } = require('xml2js')
 
 const EventReceiver = require('./events')
@@ -122,7 +121,6 @@ class NaimDevice extends EventEmitter {
 
         const headers = {
             HOST: url.host
-            //TIMEOUT: 'Second-300',
         }
 
         // Resubscribe
@@ -182,33 +180,6 @@ class NaimDevice extends EventEmitter {
     }
 }
 
-class NaimDiscover extends EventEmitter {
-    constructor() {
-        super()
-        this.browser = null
-        this.devices = {}
-    }
-    discover() {
-        console.info('Scanning for devices...')
-        this.browser = new SSDPClient()
-        this.browser.on('response', this.processDevice.bind(this))
-        this.browser.search('ssdp:all')
-    }
-    async processDevice({ LOCATION }, _, { address }) {
-        // Already know about this one, exit
-        if (this.devices[address]) return
-        const device = new NaimDevice({ address, descUrl: LOCATION })
-        this.devices[address] = device
-        await device.getInfo()
-        if (!device.isNaim()) {
-            delete this.devices[address]
-            return
-        }
-        this.emit('device', device)
-    }
-}
-
 module.exports = {
-    NaimDevice,
-    NaimDiscover
+    NaimDevice
 }

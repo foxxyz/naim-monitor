@@ -2,7 +2,7 @@ const { join } = require('path')
 const { readFile } = require('fs/promises')
 const { createServer } = require('http')
 
-const { NaimDiscover } = require('../naim-discover')
+const { Discovery } = require('../discover')
 
 class MockDevice {
     constructor(descFile) {
@@ -40,7 +40,7 @@ class MockDevice {
 
 describe('Scanner', () => {
     it('can recognize a Naim device from uPnP description', async() => {
-        const discoverer = new NaimDiscover()
+        const discoverer = new Discovery()
         const fn = jest.fn()
         discoverer.on('device', fn)
         const mockDevice = new MockDevice('sample_naim_desc.xml')
@@ -50,7 +50,7 @@ describe('Scanner', () => {
         expect(fn).toHaveBeenCalled()
     })
     it('rejects non-Naim devices', async() => {
-        const discoverer = new NaimDiscover()
+        const discoverer = new Discovery()
         const fn = jest.fn()
         discoverer.on('device', fn)
         const mockDevice = new MockDevice('sample_lg_desc.xml')

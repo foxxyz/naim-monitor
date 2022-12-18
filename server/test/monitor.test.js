@@ -1,5 +1,5 @@
 const { MockDeviceGen1, MockDeviceGen2 } = require('./mocks')
-const { NaimDevice } = require('../naim-discover')
+const { NaimDevice } = require('../device')
 
 describe('Monitor (Gen 1 Devices)', () => {
     it('can subscribe to receive playback updates', async() => {
