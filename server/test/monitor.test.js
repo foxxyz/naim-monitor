@@ -18,9 +18,11 @@ describe('Monitor (Gen 1 Devices)', () => {
         await fakeDevice.switchTrack({
             artist: 'Princess',
             trackName: 'I Would Lie 4U',
-            trackDuration: '0:04:20',
+            trackDuration: 260,
             albumName: 'Turquoise Rain',
         })
+
+        await new Promise(res => setTimeout(res, 10))
 
         await fakeDevice.stop()
         await device.unsubscribe()
@@ -29,7 +31,7 @@ describe('Monitor (Gen 1 Devices)', () => {
             artist: 'Princess',
             albumName: 'Turquoise Rain',
             trackName: 'I Would Lie 4U',
-            trackLength: '0:04:20',
+            trackLength: '04:20',
         })
     })
 })

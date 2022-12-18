@@ -2,6 +2,8 @@ const { join } = require('path')
 const { readFile } = require('fs/promises')
 const { createServer } = require('http')
 
+const { formatTime } = require('../util')
+
 class MockDeviceGen1 {
     constructor(descFile) {
         this.descFile = descFile
@@ -63,8 +65,8 @@ class MockDeviceGen1 {
                 &lt;PossibleRecordQualityModes val=&quot;NOT_IMPLEMENTED&quot;/&gt;
                 &lt;NumberOfTracks val=&quot;1&quot;/&gt;
                 &lt;CurrentTrack val=&quot;1&quot;/&gt;
-                &lt;CurrentTrackDuration val=&quot;${trackDuration}&quot;/&gt;
-                &lt;CurrentMediaDuration val=&quot;${trackDuration}&quot;/&gt;
+                &lt;CurrentTrackDuration val=&quot;${formatTime(trackDuration * 1000)}&quot;/&gt;
+                &lt;CurrentMediaDuration val=&quot;${formatTime(trackDuration * 1000)}&quot;/&gt;
                 &lt;CurrentTrackMetaData val=&quot;&amp;lt;DIDL-Lite xmlns=&amp;quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&amp;quot; xmlns:dc=&amp;quot;http://purl.org/dc/elements/1.1/&amp;quot; xmlns:upnp=&amp;quot;urn:schemas-upnp-org:metadata-1-0/upnp/&amp;quot;&amp;gt;&amp;lt;item&amp;gt;&amp;lt;dc:title&amp;gt;${trackName}&amp;lt;/dc:title&amp;gt;&amp;lt;upnp:artist&amp;gt;${artist}&amp;lt;/upnp:artist&amp;gt;&amp;lt;upnp:genre&amp;gt;Indie&amp;lt;/upnp:genre&amp;gt;&amp;lt;upnp:album&amp;gt;${albumName}&amp;lt;/upnp:album&amp;gt;&amp;lt;upnp:albumArtURI&amp;gt;${albumArtURL}&amp;lt;/upnp:albumArtURI&amp;gt;&amp;lt;res duration=&amp;quot;${trackDuration}&amp;quot; protocolInfo=&amp;quot;http-get:*:${format}:*&amp;quot;&amp;gt;${itemURI}&amp;lt;/res&amp;gt;&amp;lt;/item&amp;gt;&amp;lt;/DIDL-Lite&amp;gt;&quot;/&gt;
                 &lt;CurrentTrackURI val=&quot;${itemURI}&quot;/&gt;
                 &lt;AVTransportURI val=&quot;${itemURI}&quot;/&gt;
