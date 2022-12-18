@@ -97,10 +97,98 @@ class MockDeviceGen1 {
 }
 
 class MockDeviceGen2 {
-    constructor(descFile) {
+    constructor(descFile, uuid) {
         this.descFile = descFile
-        this.server = createServer(this.receive.bind(this))
-        this.server.on('connection', socket => this.socket = socket)
+        this.uuid = uuid
+        this.serviceServer = createServer(this.receiveServiceReq.bind(this))
+        this.serviceServer.on('connection', socket => this.serviceSocket = socket)
+        this.cmdServer = createServer(this.receiveCmdReq.bind(this))
+        this.cmdServer.on('connection', socket => this.cmdSocket = socket)
+    }
+    get address() {
+        return this.serviceServer.address().address
+    }
+    get host() {
+        const { address, port } = this.serviceServer.address()
+        return `${address}:${port}`
+    }
+    receiveServiceReq(req, res) {
+        if (req.url === `/${this.uuid}.xml`) {
+            return res.end(this.upnpDesc)
+        }
+    }
+    receiveCmdReq(req, res) {
+        if (req.url === '/nowplaying') {
+            const trackInfo = {
+                version: '1.4.0',
+                changestamp: 0,
+                name: 'Now Playing',
+                ussi: 'nowplaying',
+                class: 'object.nowplaying',
+                albumName: this.albumName,
+                artistName: this.artist,
+                bitDepth: 16,
+                canResume: 1,
+                channels: 2,
+                codec: 'FLAC',
+                contentTag: 28,
+                cpu: 352,
+                description: 'Test description',
+                duration: this.trackDuration,
+                error: 0,
+                live: 0,
+                mimeType: 'audio/x-flac',
+                repeat: 0,
+                restrictPause: 0,
+                restrictPeekNext: 0,
+                restrictPeekPrev: 0,
+                restrictResume: 0,
+                restrictSeek: 0,
+                restrictSkipNext: 0,
+                restrictSkipPrev: 0,
+                restrictStop: 0,
+                sampleRate: 44100,
+                shuffle: 0,
+                source: 'inputs/playqueue',
+                sourceDetail: 'upnp',
+                sourceMultiroom: 'inputs/none',
+                streamDomain: '',
+                streamMessage: '',
+                title: this.trackName,
+                transportPosition: 0,
+                transportState: 2
+            }
+            res.setHeader('Etag', '3p_o17-rzeRoPQLOhJsq')
+            return res.end(JSON.stringify(trackInfo))
+        }
+    }
+    async start() {
+        // Use sample upnp description
+        this.upnpDesc = await readFile(join(__dirname, this.descFile), 'utf8')
+        await Promise.all([
+            new Promise(res => this.serviceServer.listen(0, '127.0.0.1', res)),
+            new Promise(res => this.cmdServer.listen(15081, '127.0.0.1', res)),
+        ])
+        this.ssdp = {
+            'CACHE-CONTROL': 'max-age=1800',
+            EXT: '',
+            LOCATION: `http://${this.host}/${this.uuid}.xml`,
+            SERVER: 'Linux/4.1.15 UPnP/1.0 GUPnP/0.20.14',
+            ST: 'upnp:rootdevice',
+            USN: `uuid:${this.uuid}::upnp:rootdevice`,
+        }
+    }
+    async stop() {
+        this.serviceSocket.destroy()
+        await new Promise(res => this.serviceServer.close(res))
+        this.cmdSocket.destroy()
+        await new Promise(res => this.cmdServer.close(res))
+    }
+    switchTrack({ artist, trackName, trackDuration, albumName }) {
+        this.artist = artist
+        this.trackName = trackName
+        this.trackDuration = trackDuration * 1000
+        this.albumName = albumName
     }
 }
 

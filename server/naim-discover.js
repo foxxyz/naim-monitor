@@ -19,6 +19,7 @@ class NaimDevice extends EventEmitter {
         super()
         this.address = address
         this.currentTrack = {}
+        this.checkFrequency = 1000
         this.descUrl = descUrl
         this.info = {}
         this.services = []
@@ -97,7 +98,7 @@ class NaimDevice extends EventEmitter {
         if (this.generation === 2) {
             await this.checkStatus()
             this.timers.checkStatus = {
-                timer: setTimeout(this.subscribe.bind(this), 1000)
+                timer: setTimeout(this.subscribe.bind(this), this.checkFrequency)
             }
             return
         }
