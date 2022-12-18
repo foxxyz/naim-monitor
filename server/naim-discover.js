@@ -3,6 +3,7 @@ const { Client: SSDPClient } = require('node-ssdp')
 const { Parser: XMLParser } = require('xml2js')
 
 const EventReceiver = require('./events')
+const { formatTime } = require('./util')
 let GLOBAL_EVENT_RECEIVER
 
 const xmlParser = new XMLParser()
@@ -24,8 +25,35 @@ class NaimDevice extends EventEmitter {
         this.timers = {}
         this.boundReceive = this.receive.bind(this)
     }
+    // Only works on 2nd generation devices
+    async checkStatus() {
+        const url = `http://${this.address}:15081/nowplaying`
+        let res
+        try {
+            res = await fetch(url)
+        } catch (e) {
+            console.warn(`Unable to retrieve playing info from ${url}: ${e}`)
+            return
+        }
+        const trackInfo = await res.json()
+        const { title: trackName, albumName, artistName: artist, duration } = trackInfo
+        const metaData = {
+            artist,
+            trackName,
+            albumName,
+            trackLength: formatTime(duration),
+        }
+        // No change, exit
+        if (metaData.trackName === this.currentTrack.trackName && metaData.artist === this.currentTrack.artist) return
+        // Emit
+        Object.assign(this.currentTrack, metaData)
+        this.emit('trackChange', this.currentTrack)
+    }
     get description() {
         return `"${this.info.friendlyName[0]}" (${this.info.modelName[0]} type ${this.info.modelNumber[0]})`
+    }
+    get generation() {
+        return this.info.modelNumber[0].endsWith('0034') ? 2 : 1
     }
     // Get info on services from uPnP description
     async getInfo() {
@@ -56,14 +84,24 @@ class NaimDevice extends EventEmitter {
             this.emit('trackChange', this.currentTrack)
             if (!this.currentTrack.artist && !this.currentTrack.trackName) {
                 console.info('Stopped Playing.')
-            } else {
-                console.info(`Now Playing: ${this.currentTrack.artist} - ${this.currentTrack.trackName}\t\t\t\t(${this.currentTrack.trackLength ? this.currentTrack.trackLength : 'Multiroom'}${this.currentTrack.album ? ` / ${this.currentTrack.album}` : ''})`)
             }
         } else if (name === 'CurrentTrackDuration') {
             this.currentTrack.trackLength = value
         }
     }
     async subscribe({ subscriptionID, receiver } = {}) {
+        // Ensure we know the device info
+        if (!this.info.friendlyName) await this.getInfo()
+
+        // 2nd generation devices don't use upnp subscriptions, use HTTP GET instead
+        if (this.generation === 2) {
+            await this.checkStatus()
+            this.timers.checkStatus = {
+                timer: setTimeout(this.subscribe.bind(this), 1000)
+            }
+            return
+        }
+
         // Use global receiver if none given
         if (!receiver) {
             // Start the global receiver if not started yet
@@ -73,9 +111,6 @@ class NaimDevice extends EventEmitter {
             }
             receiver = GLOBAL_EVENT_RECEIVER
         }
-
-        // Ensure we know the device info
-        if (!this.info.friendlyName) await this.getInfo()
 
         // Get the AVTransport service
         const service = this.services.find(s => s.serviceType[0].includes('AVTransport'))
@@ -137,10 +172,10 @@ class NaimDevice extends EventEmitter {
         const tasks = []
         for(const subscriptionID in this.timers) {
             const { receiver, timer } = this.timers[subscriptionID]
-            receiver.off(subscriptionID, this.boundReceive)
+            if (receiver) receiver.off(subscriptionID, this.boundReceive)
             clearTimeout(timer)
             // Check if receiver can be closed
-            if (!receiver.eventNames().length) tasks.push(receiver.stop())
+            if (receiver && !receiver.eventNames().length) tasks.push(receiver.stop())
         }
         return Promise.all(tasks)
     }

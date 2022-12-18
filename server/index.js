@@ -19,16 +19,16 @@ parser.add_argument('--naim-host', { help: 'IP/Host of Naim speaker to monitor (
 const args = parser.parse_args()
 
 function connect(device, eventReceiver, wsServer) {
-    // Subscribe
-    device.subscribe({ receiver: eventReceiver })
-
     // Emit track changes
     device.on('trackChange', track => {
+        console.info(`Now Playing: ${track.artist} - ${track.trackName}\t\t\t\t(${track.trackLength ? track.trackLength : 'Multiroom'}${track.album ? ` / ${track.album}` : ''})`)
         wsServer.broadcast('trackChange', { device: device.name, ...track })
     })
     wsServer.on('connect', client => {
         client.send('trackChange', { device: device.name, ...device.currentTrack })
     })
+    // Subscribe
+    device.subscribe({ receiver: eventReceiver })
 }
 
 async function main() {
@@ -38,17 +38,13 @@ async function main() {
     const eventReceiver = new EventReceiver()
     await eventReceiver.listen()
 
-    if (args.naim_host) {
-        const device = new NaimDevice({ address: args.naim_host, descUrl: `http://${args.naim_host}:8080/description.xml` })
+    const browser = new NaimDiscover()
+    browser.discover()
+    browser.on('device', device => {
+        if (args.naim_host && args.naim_host !== device.address) return
+        console.success(`Found ${device.description} at ${device.address}`)
         connect(device, eventReceiver, wsServer)
-    } else {
-        const browser = new NaimDiscover()
-        browser.discover()
-        browser.on('device', device => {
-            console.success(`Found ${device.description} at ${device.address}`)
-            connect(device, eventReceiver, wsServer)
-        })
-    }
+    })
 }
 
 main()
