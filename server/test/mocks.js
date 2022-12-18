@@ -98,23 +98,14 @@ class MockDeviceGen1 {
     }
 }
 
-class MockDeviceGen2 {
+class MockDeviceGen2 extends MockDeviceGen1 {
     constructor(descFile, uuid) {
-        this.descFile = descFile
+        super(descFile)
         this.uuid = uuid
-        this.serviceServer = createServer(this.receiveServiceReq.bind(this))
-        this.serviceServer.on('connection', socket => this.serviceSocket = socket)
         this.cmdServer = createServer(this.receiveCmdReq.bind(this))
         this.cmdServer.on('connection', socket => this.cmdSocket = socket)
     }
-    get address() {
-        return this.serviceServer.address().address
-    }
-    get host() {
-        const { address, port } = this.serviceServer.address()
-        return `${address}:${port}`
-    }
-    receiveServiceReq(req, res) {
+    receive(req, res) {
         if (req.url === `/${this.uuid}.xml`) {
             return res.end(this.upnpDesc)
         }
@@ -165,12 +156,8 @@ class MockDeviceGen2 {
         }
     }
     async start() {
-        // Use sample upnp description
-        this.upnpDesc = await readFile(join(__dirname, this.descFile), 'utf8')
-        await Promise.all([
-            new Promise(res => this.serviceServer.listen(0, '127.0.0.1', res)),
-            new Promise(res => this.cmdServer.listen(15081, '127.0.0.1', res)),
-        ])
+        await super.start()
+        await new Promise(res => this.cmdServer.listen(15081, '127.0.0.1', res))
         this.ssdp = {
             'CACHE-CONTROL': 'max-age=1800',
             EXT: '',
@@ -181,8 +168,7 @@ class MockDeviceGen2 {
         }
     }
     async stop() {
-        this.serviceSocket.destroy()
-        await new Promise(res => this.serviceServer.close(res))
+        await super.stop()
         this.cmdSocket.destroy()
         await new Promise(res => this.cmdServer.close(res))
     }
