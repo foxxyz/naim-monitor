@@ -13,21 +13,43 @@ async function parseUpnpDescription(url) {
     return description.root.device[0]
 }
 
+class UPnPDevice {
+    static async detect(descriptionUrl) {
+        let info
+        try {
+            info = await parseUpnpDescription(descriptionUrl)
+        } catch (e) {
+            return console.error(`Unable to parse description for ${descriptionUrl}`)
+        }
+        // We only care about Naim devices
+        if (!info.manufacturer[0]?.includes('Naim')) return
+        // Determine device generation
+        const generation = info.modelNumber[0].endsWith('0034') ? 2 : 1
+        const address = new URL(descriptionUrl)
+        const [name] = info.friendlyName
+        const [modelName] = info.modelName
+        const [modelNumber] = info.modelNumber
+        const services = info.serviceList[0].service
+        return new NaimDevice({ address, name, modelName, modelNumber, services })
+    }
+}
+
 class NaimDevice extends EventEmitter {
-    constructor({ address, descUrl }) {
+    constructor({ address, name, modelName, modelNumber, services }) {
         super()
         this.address = address
         this.currentTrack = {}
         this.checkFrequency = 1000
-        this.descUrl = descUrl
-        this.info = {}
-        this.services = []
+        this.name = name
+        this.modelName = modelName
+        this.modelNumber = modelNumber
+        this.services = services
         this.timers = {}
         this.boundReceive = this.receive.bind(this)
     }
     // Only works on 2nd generation devices
     async checkStatus() {
-        const url = `http://${this.address}:15081/nowplaying`
+        const url = `http://${this.address.hostname}:15081/nowplaying`
         let res
         try {
             res = await fetch(url)
@@ -50,26 +72,10 @@ class NaimDevice extends EventEmitter {
         this.emit('trackChange', this.currentTrack)
     }
     get description() {
-        return `"${this.info.friendlyName[0]}" (${this.info.modelName[0]} type ${this.info.modelNumber[0]})`
+        return `"${this.name}" (${this.modelName} type ${this.modelNumber})`
     }
     get generation() {
-        return this.info.modelNumber[0].endsWith('0034') ? 2 : 1
-    }
-    // Get info on services from uPnP description
-    async getInfo() {
-        try {
-            this.info = await parseUpnpDescription(this.descUrl)
-            this.services = this.info.serviceList[0].service
-        } catch (e) {
-            console.error(`Unable to parse description for ${this.descUrl}`)
-        }
-    }
-    isNaim() {
-        if (!this.info.manufacturer) return
-        return this.info.manufacturer[0]?.includes('Naim')
-    }
-    get name() {
-        return this.info.friendlyName[0]
+        return this.modelNumber.endsWith('0034') ? 2 : 1
     }
     async receive({ name, value }) {
         if (name === 'CurrentTrackMetaData' && value) {
@@ -91,7 +97,7 @@ class NaimDevice extends EventEmitter {
     }
     async subscribe({ subscriptionID, receiver } = {}) {
         // Ensure we know the device info
-        if (!this.info.friendlyName) await this.getInfo()
+        // if (!this.info.friendlyName) await this.getInfo()
 
         // 2nd generation devices don't use upnp subscriptions, use HTTP GET instead
         if (this.generation === 2) {
@@ -116,8 +122,7 @@ class NaimDevice extends EventEmitter {
         const service = this.services.find(s => s.serviceType[0].includes('AVTransport'))
 
         // Make uPnP SUBSCRIBE call
-        const origin = new URL(this.descUrl).origin
-        const url = new URL(service.eventSubURL[0], origin)
+        const url = new URL(service.eventSubURL[0], this.address.origin)
 
         const headers = {
             HOST: url.host
@@ -181,5 +186,6 @@ class NaimDevice extends EventEmitter {
 }
 
 module.exports = {
-    NaimDevice
+    NaimDevice,
+    UPnPDevice,
 }

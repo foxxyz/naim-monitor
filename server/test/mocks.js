@@ -93,7 +93,7 @@ class MockDeviceGen1 {
         })
     }
     async stop() {
-        this.socket.destroy()
+        if (this.socket) this.socket.destroy()
         await new Promise(res => this.server.close(res))
     }
 }
@@ -169,7 +169,7 @@ class MockDeviceGen2 extends MockDeviceGen1 {
     }
     async stop() {
         await super.stop()
-        this.cmdSocket.destroy()
+        if (this.cmdSocket) this.cmdSocket.destroy()
         await new Promise(res => this.cmdServer.close(res))
     }
     switchTrack({ artist, trackName, trackDuration, albumName }) {

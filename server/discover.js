@@ -1,6 +1,6 @@
 const EventEmitter = require('events')
 const { Client: SSDPClient } = require('node-ssdp')
-const { NaimDevice } = require('./device')
+const { UPnPDevice } = require('./device')
 
 class Discovery extends EventEmitter {
     constructor() {
@@ -17,13 +17,8 @@ class Discovery extends EventEmitter {
     async processDevice({ LOCATION }, _, { address }) {
         // Already know about this one, exit
         if (this.devices[address]) return
-        const device = new NaimDevice({ address, descUrl: LOCATION })
-        this.devices[address] = device
-        await device.getInfo()
-        if (!device.isNaim()) {
-            delete this.devices[address]
-            return
-        }
+        const device = await UPnPDevice.detect(LOCATION)
+        if (!device) return
         this.emit('device', device)
     }
 }
