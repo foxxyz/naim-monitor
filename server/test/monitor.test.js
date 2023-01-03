@@ -1,5 +1,5 @@
 const { MockDeviceGen1, MockDeviceGen2 } = require('./mocks')
-const { NaimDevice } = require('../device')
+const { NaimGen1Device, NaimGen2Device } = require('../device')
 
 const SERVICES_GEN_1 = [
     {
@@ -32,7 +32,7 @@ describe('Monitor (Gen 1 Devices)', () => {
 
         const fn = jest.fn()
 
-        const device = new NaimDevice({
+        const device = new NaimGen1Device({
             address: new URL(`http://${fakeDevice.host}/description.xml`),
             name: 'Gen 1 Mu-so',
             modelNumber: '20-004-0007',
@@ -94,7 +94,7 @@ describe('Monitor (Gen 2 Devices)', () => {
 
         const fn = jest.fn()
 
-        const device = new NaimDevice({
+        const device = new NaimGen2Device({
             address: new URL(`http://${fakeDevice.host}/f41662fe-fa97-4371-8bc9-88ff88ff88ff.xml`),
             name: 'Gen 2 Mu-so Qb',
             modelNumber: '20-004-0034',

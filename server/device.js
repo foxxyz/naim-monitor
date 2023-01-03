@@ -30,7 +30,7 @@ class UPnPDevice {
         const [modelName] = info.modelName
         const [modelNumber] = info.modelNumber
         const services = info.serviceList[0].service
-        return new NaimDevice({ address, name, modelName, modelNumber, services })
+        return new DEVICES[generation]({ address, name, modelName, modelNumber, services })
     }
 }
 
@@ -39,43 +39,21 @@ class NaimDevice extends EventEmitter {
         super()
         this.address = address
         this.currentTrack = {}
-        this.checkFrequency = 1000
         this.name = name
         this.modelName = modelName
         this.modelNumber = modelNumber
         this.services = services
-        this.timers = {}
-        this.boundReceive = this.receive.bind(this)
-    }
-    // Only works on 2nd generation devices
-    async checkStatus() {
-        const url = `http://${this.address.hostname}:15081/nowplaying`
-        let res
-        try {
-            res = await fetch(url)
-        } catch (e) {
-            console.warn(`Unable to retrieve playing info from ${url}: ${e}`)
-            return
-        }
-        const trackInfo = await res.json()
-        const { title: trackName, albumName, artistName: artist, duration } = trackInfo
-        const metaData = {
-            artist,
-            trackName,
-            albumName,
-            trackLength: formatTime(duration),
-        }
-        // No change, exit
-        if (metaData.trackName === this.currentTrack.trackName && metaData.artist === this.currentTrack.artist) return
-        // Emit
-        Object.assign(this.currentTrack, metaData)
-        this.emit('trackChange', this.currentTrack)
     }
     get description() {
         return `"${this.name}" (${this.modelName} type ${this.modelNumber})`
     }
-    get generation() {
-        return this.modelNumber.endsWith('0034') ? 2 : 1
+}
+
+class NaimGen1Device extends NaimDevice {
+    constructor(...args) {
+        super(...args)
+        this.timers = {}
+        this.boundReceive = this.receive.bind(this)
     }
     async receive({ name, value }) {
         if (name === 'CurrentTrackMetaData' && value) {
@@ -96,18 +74,6 @@ class NaimDevice extends EventEmitter {
         }
     }
     async subscribe({ subscriptionID, receiver } = {}) {
-        // Ensure we know the device info
-        // if (!this.info.friendlyName) await this.getInfo()
-
-        // 2nd generation devices don't use upnp subscriptions, use HTTP GET instead
-        if (this.generation === 2) {
-            await this.checkStatus()
-            this.timers.checkStatus = {
-                timer: setTimeout(this.subscribe.bind(this), this.checkFrequency)
-            }
-            return
-        }
-
         // Use global receiver if none given
         if (!receiver) {
             // Start the global receiver if not started yet
@@ -185,7 +151,52 @@ class NaimDevice extends EventEmitter {
     }
 }
 
+class NaimGen2Device extends NaimDevice {
+    constructor(...args) {
+        super(...args)
+        this.checkFrequency = 1000
+        this.checkTimer = null
+    }
+    async checkStatus() {
+        const url = `http://${this.address.hostname}:15081/nowplaying`
+        let res
+        try {
+            res = await fetch(url)
+        } catch (e) {
+            console.warn(`Unable to retrieve playing info from ${url}: ${e}`)
+            return
+        }
+        const trackInfo = await res.json()
+        const { title: trackName, albumName, artistName: artist, duration } = trackInfo
+        const metaData = {
+            artist,
+            trackName,
+            albumName,
+            trackLength: formatTime(duration),
+        }
+        // No change, exit
+        if (metaData.trackName === this.currentTrack.trackName && metaData.artist === this.currentTrack.artist) return
+        // Emit
+        Object.assign(this.currentTrack, metaData)
+        this.emit('trackChange', this.currentTrack)
+    }
+    // 2nd generation devices don't use upnp subscriptions, use HTTP GET instead
+    async subscribe() {
+        await this.checkStatus()
+        this.checkTimer = setTimeout(this.subscribe.bind(this), this.checkFrequency)
+    }
+    unsubscribe() {
+        clearTimeout(this.checkTimer)
+    }
+}
+
+const DEVICES = {
+    1: NaimGen1Device,
+    2: NaimGen2Device,
+}
+
 module.exports = {
-    NaimDevice,
+    NaimGen1Device,
+    NaimGen2Device,
     UPnPDevice,
 }
