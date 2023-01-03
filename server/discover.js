@@ -17,6 +17,8 @@ class Discovery extends EventEmitter {
     async processDevice({ LOCATION }, _, { address }) {
         // Already know about this one, exit
         if (this.devices[address]) return
+        // Cache
+        this.devices[address] = LOCATION
         const device = await UPnPDevice.detect(LOCATION)
         if (!device) return
         this.emit('device', device)

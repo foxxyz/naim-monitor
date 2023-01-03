@@ -49,6 +49,19 @@ describe('Scanner', () => {
         await mockDevice.stop()
         expect(fn).toHaveBeenCalled()
     })
+    it('only reports devices once', async() => {
+        const discoverer = new Discovery()
+        const fn = jest.fn()
+        discoverer.on('device', fn)
+        const mockDevice = new MockDevice('sample_naim_desc.xml')
+        await mockDevice.start()
+        await Promise.all([
+            discoverer.processDevice(mockDevice.ssdp, 200, { address: mockDevice.address }),
+            discoverer.processDevice(mockDevice.ssdp, 200, { address: mockDevice.address }),
+        ])
+        await mockDevice.stop()
+        expect(fn).toHaveBeenCalledTimes(1)
+    })
     it('rejects non-Naim devices', async() => {
         const discoverer = new Discovery()
         const fn = jest.fn()
