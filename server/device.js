@@ -50,9 +50,9 @@ class NaimDevice extends EventEmitter {
 }
 
 class NaimGen1Device extends NaimDevice {
+    timers = {}
     constructor(...args) {
         super(...args)
-        this.timers = {}
         this.boundReceive = this.receive.bind(this)
     }
     async receive({ name, value }) {
@@ -152,11 +152,8 @@ class NaimGen1Device extends NaimDevice {
 }
 
 class NaimGen2Device extends NaimDevice {
-    constructor(...args) {
-        super(...args)
-        this.checkFrequency = 1000
-        this.checkTimer = null
-    }
+    checkFrequency = 1000
+    checkTimer
     async checkStatus() {
         const url = `http://${this.address.hostname}:15081/nowplaying`
         let res
