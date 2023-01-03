@@ -26,10 +26,15 @@ const SERVICES_GEN_1 = [
 ]
 
 describe('Monitor (Gen 1 Devices)', () => {
-    it('can subscribe to receive playback updates', async() => {
-        const fakeDevice = new MockDeviceGen1('sample_naim_desc.xml')
+    let fakeDevice
+    beforeEach(async() => {
+        fakeDevice = new MockDeviceGen1('sample_naim_desc.xml')
         await fakeDevice.start()
-
+    })
+    afterEach(async() => {
+        await fakeDevice.stop()
+    })
+    it('can subscribe to receive playback updates', async() => {
         const fn = jest.fn()
 
         const device = new NaimGen1Device({
@@ -51,7 +56,6 @@ describe('Monitor (Gen 1 Devices)', () => {
 
         await new Promise(res => setTimeout(res, 10))
 
-        await fakeDevice.stop()
         await device.unsubscribe()
 
         expect(fn).toHaveBeenCalledWith({
@@ -60,6 +64,16 @@ describe('Monitor (Gen 1 Devices)', () => {
             trackName: 'I Would Lie 4U',
             trackLength: '04:20',
         })
+    })
+    it('shows descriptions', () => {
+        const device = new NaimGen1Device({
+            address: new URL(`http://${fakeDevice.host}/description.xml`),
+            name: 'Bedroom',
+            modelNumber: '20-004-0007',
+            modelName: 'Mu-so',
+            services: SERVICES_GEN_1,
+        })
+        expect(device.description).toEqual('"Bedroom" (Mu-so type 20-004-0007)')
     })
 })
 
@@ -88,10 +102,15 @@ const SERVICES_GEN_2 = [
 ]
 
 describe('Monitor (Gen 2 Devices)', () => {
-    it('can subscribe to receive playback updates', async() => {
-        const fakeDevice = new MockDeviceGen2('sample_naim_2_desc.xml', 'f41662fe-fa97-4371-8bc9-88ff88ff88ff')
+    let fakeDevice
+    beforeEach(async() => {
+        fakeDevice = new MockDeviceGen2('sample_naim_2_desc.xml', 'f41662fe-fa97-4371-8bc9-88ff88ff88ff')
         await fakeDevice.start()
-
+    })
+    afterEach(async() => {
+        await fakeDevice.stop()
+    })
+    it('can subscribe to receive playback updates', async() => {
         const fn = jest.fn()
 
         const device = new NaimGen2Device({
@@ -116,7 +135,6 @@ describe('Monitor (Gen 2 Devices)', () => {
 
         await new Promise(res => setTimeout(res, 10))
 
-        await fakeDevice.stop()
         await device.unsubscribe()
 
         expect(fn).toHaveBeenCalledWith({
@@ -125,5 +143,15 @@ describe('Monitor (Gen 2 Devices)', () => {
             trackName: 'I Would Lie 4U',
             trackLength: '04:20',
         })
+    })
+    it('shows descriptions', () => {
+        const device = new NaimGen1Device({
+            address: new URL(`http://${fakeDevice.host}/f41662fe-fa97-4371-8bc9-88ff88ff88ff.xml`),
+            name: 'Bedroom',
+            modelNumber: '20-004-0034',
+            modelName: 'Mu-so Qb',
+            services: SERVICES_GEN_1,
+        })
+        expect(device.description).toEqual('"Bedroom" (Mu-so Qb type 20-004-0034)')
     })
 })
