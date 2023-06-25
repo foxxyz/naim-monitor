@@ -43,7 +43,7 @@ class NAIMController {
         const packet = await this.xmlParser.parseStringPromise(data.toString())
         console.log(packet)
         if (packet.event) {
-            switch(packet.event.$.name) {
+            switch (packet.event.$.name) {
                 case 'GetNowPlayingTime':
                     parsePlayTime(packet.event.map)
                     break

@@ -140,7 +140,7 @@ class NaimGen1Device extends NaimDevice {
     }
     unsubscribe() {
         const tasks = []
-        for(const subscriptionID in this.timers) {
+        for (const subscriptionID in this.timers) {
             const { receiver, timer } = this.timers[subscriptionID]
             if (receiver) receiver.off(subscriptionID, this.boundReceive)
             clearTimeout(timer)

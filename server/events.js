@@ -36,7 +36,7 @@ class EventReceiver extends EventEmitter {
             return
         }
         const instanceEvent = event.Event.InstanceID[0]
-        for(const name in instanceEvent) {
+        for (const name in instanceEvent) {
             // Skip attributes for instance (usually just "val=0")
             if (name === '$') continue
             const value = instanceEvent[name][0].$.val

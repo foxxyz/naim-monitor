@@ -9,7 +9,7 @@ class XMLParser extends Transform {
     _transform(chunk, encoding, cb) {
         this.buffer = Buffer.concat([this.buffer, chunk])
         let message = this.buffer.toString().replaceAll('\n', '').replaceAll('\t', '')
-        while(message.length) {
+        while (message.length) {
             const [, firstTag] = message.match('^<([^ >]+)')
             const endTag = `</${firstTag}>`
             const packetEnd = message.indexOf(endTag)
