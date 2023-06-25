@@ -16,6 +16,7 @@ parser.add_argument('-v', { action: 'version', version: packageInfo.version })
 parser.add_argument('--ws-host', { help: 'Websocket Host', default: '127.0.0.1' })
 parser.add_argument('--ws-port', { help: 'Websocket Port', default: 8090 })
 parser.add_argument('--naim-host', { help: 'IP/Host of Naim speaker to monitor (omit to autodiscover)', default: SUPPRESS })
+parser.add_argument('--verbose', { help: 'Show log/debug messages', action: 'store_true' })
 const args = parser.parse_args()
 
 function connect(device, eventReceiver, wsServer) {
@@ -32,7 +33,7 @@ function connect(device, eventReceiver, wsServer) {
 }
 
 async function main() {
-    const wsServer = new WSServer({ host: args.ws_host, port: args.ws_port })
+    const wsServer = new WSServer({ host: args.ws_host, port: args.ws_port, verbosity: args.verbose ? 1 : 0 })
 
     // Start event receiving server
     const eventReceiver = new EventReceiver()
