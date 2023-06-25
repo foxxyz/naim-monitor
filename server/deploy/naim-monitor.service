@@ -1,5 +1,7 @@
 [Unit]
 Description=Naim Monitor Server
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 ExecStart=/usr/bin/node /opt/naim-monitor/server/index.js --ws-host 0.0.0.0
