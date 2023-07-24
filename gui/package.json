@@ -14,18 +14,18 @@
   "author": "Ivo Janssen <hello@ivo.la>",
   "license": "MIT",
   "devDependencies": {
-    "@appliedminds/eslint-config": "^1.5.0",
-    "eslint": "^8.43.0",
+    "@appliedminds/eslint-config": "^1.5.1",
+    "eslint": "^8.45.0",
     "eslint-plugin-vue": "^9.15.1",
-    "sass": "^1.63.6"
+    "sass": "^1.64.1"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
-    "album-image": "^1.0.2",
+    "album-image": "^1.0.3",
     "randomcolor": "^0.6.2",
-    "vite": "^4.3.9",
+    "vite": "^4.4.7",
     "vue": "^3.3.4",
-    "vue-router": "^4.2.2",
+    "vue-router": "^4.2.4",
     "ws-plus": "^5.0.0"
   },
   "eslintConfig": {
