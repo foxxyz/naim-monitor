@@ -4,6 +4,8 @@ DEPLOY_DIR="/opt/naim-monitor"
 DEPLOY_MODE="production"
 RSYNC_DIR=$DEPLOY_DIR
 
+set -e
+
 cd $SCRIPT_DIR
 
 while getopts t:m:f flag
