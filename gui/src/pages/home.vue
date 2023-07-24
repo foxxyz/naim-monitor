@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import fetchAlbumArt from 'album-art'
+import { getAlbumImage } from 'album-image'
 import randomColor from 'randomcolor'
 import { reactive, ref, watch } from 'vue'
 import { listen } from 'ws-plus/vue'
@@ -45,22 +45,21 @@ listen({
         // Same track called for possibly a different device - ignore
         if (info.artist === track.artist && info.trackName === track.trackName) return
 
-        // Get album art
-        const options = { size: 'large' }
-        if (info.albumName) options.album = info.albumName
-        let src
         // Try getting album art
-        try {
-            src = await fetchAlbumArt(info.artist, options)
-        } catch (e) {
-            // Try just artist if no results
+        if (info.artist !== track.artist || info.albumName !== track.albumName) {
+            let src
             try {
-                src = await fetchAlbumArt(info.artist, { size: 'large' })
+                src = await getAlbumImage({ artist: info.artist, album: info.albumName })
             } catch (e) {
-                console.warn(`No album art results for ${info.artist}!`)
+                // Try just album name if no results
+                try {
+                    src = await getAlbumImage({ album: info.albumName })
+                } catch (e) {
+                    console.warn(`No album art results for ${info.artist}!`)
+                }
             }
+            albumArt.value = src
         }
-        albumArt.value = src
         Object.assign(track, info)
         device.name = info.device
         loading.value = false
