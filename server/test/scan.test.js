@@ -1,8 +1,13 @@
-const { join } = require('path')
-const { readFile } = require('fs/promises')
-const { createServer } = require('http')
+import assert from 'node:assert'
+import { describe, it, mock } from 'node:test'
+import { join } from 'path'
+import { readFile } from 'fs/promises'
+import { createServer } from 'http'
+import { fileURLToPath } from 'url'
 
-const { Discovery } = require('../discover')
+import { Discovery } from '../discover.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 class MockDevice {
     constructor(descFile) {
@@ -41,17 +46,17 @@ class MockDevice {
 describe('Scanner', () => {
     it('can recognize a Naim device from uPnP description', async() => {
         const discoverer = new Discovery()
-        const fn = jest.fn()
+        const fn = mock.fn()
         discoverer.on('device', fn)
         const mockDevice = new MockDevice('sample_naim_desc.xml')
         await mockDevice.start()
         await discoverer.processDevice(mockDevice.ssdp, 200, { address: mockDevice.address })
         await mockDevice.stop()
-        expect(fn).toHaveBeenCalled()
+        assert.notEqual(fn.mock.calls.length, 0)
     })
     it('only reports devices once', async() => {
         const discoverer = new Discovery()
-        const fn = jest.fn()
+        const fn = mock.fn()
         discoverer.on('device', fn)
         const mockDevice = new MockDevice('sample_naim_desc.xml')
         await mockDevice.start()
@@ -60,16 +65,16 @@ describe('Scanner', () => {
             discoverer.processDevice(mockDevice.ssdp, 200, { address: mockDevice.address }),
         ])
         await mockDevice.stop()
-        expect(fn).toHaveBeenCalledTimes(1)
+        assert.equal(fn.mock.calls.length, 1)
     })
     it('rejects non-Naim devices', async() => {
         const discoverer = new Discovery()
-        const fn = jest.fn()
+        const fn = mock.fn()
         discoverer.on('device', fn)
         const mockDevice = new MockDevice('sample_lg_desc.xml')
         await mockDevice.start()
         await discoverer.processDevice(mockDevice.ssdp, 200, { address: mockDevice.address })
         await mockDevice.stop()
-        expect(fn).not.toHaveBeenCalled()
+        assert.equal(fn.mock.calls.length, 0)
     })
 })

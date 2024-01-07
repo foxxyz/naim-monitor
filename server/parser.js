@@ -1,7 +1,7 @@
-const { Transform } = require('stream')
+import { Transform } from 'stream'
 
 // Parser to mend incoming TCP packets for valid XML
-class XMLParser extends Transform {
+export class XMLParser extends Transform {
     constructor(args) {
         super(args)
         this.buffer = Buffer.alloc(0)
@@ -27,5 +27,3 @@ class XMLParser extends Transform {
         cb()
     }
 }
-
-module.exports = XMLParser

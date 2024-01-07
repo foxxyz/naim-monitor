@@ -1,10 +1,13 @@
-const { join } = require('path')
-const { readFile } = require('fs/promises')
-const { createServer } = require('http')
+import { join } from 'path'
+import { readFile } from 'fs/promises'
+import { createServer } from 'http'
+import { fileURLToPath } from 'url'
 
-const { formatTime } = require('../util')
+import { formatTime } from '../util.js'
 
-class MockDeviceGen1 {
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
+export class MockDeviceGen1 {
     constructor(descFile) {
         this.descFile = descFile
         this.server = createServer(this.receive.bind(this))
@@ -98,7 +101,7 @@ class MockDeviceGen1 {
     }
 }
 
-class MockDeviceGen2 extends MockDeviceGen1 {
+export class MockDeviceGen2 extends MockDeviceGen1 {
     constructor(descFile, uuid) {
         super(descFile)
         this.uuid = uuid
@@ -178,9 +181,4 @@ class MockDeviceGen2 extends MockDeviceGen1 {
         this.trackDuration = trackDuration * 1000
         this.albumName = albumName
     }
-}
-
-module.exports = {
-    MockDeviceGen1,
-    MockDeviceGen2,
 }

@@ -1,10 +1,10 @@
-const concat = require('concat-stream')
-const EventEmitter = require('events')
-const { createServer } = require('http')
-const { ipv4 } = require('network-address')
-const { Parser: XMLParser } = require('xml2js')
+import concat from 'concat-stream'
+import EventEmitter from 'events'
+import { createServer } from 'http'
+import protocols from 'network-address'
+import { Parser as XMLParser } from 'xml2js'
 
-class EventReceiver extends EventEmitter {
+export default class EventReceiver extends EventEmitter {
     constructor() {
         super()
         this.parser = new XMLParser()
@@ -15,7 +15,7 @@ class EventReceiver extends EventEmitter {
         return `http://${address}:${port}`
     }
     listen() {
-        return new Promise(res => this.server.listen(0, ipv4(), res))
+        return new Promise(res => this.server.listen(0, protocols.ipv4(), res))
     }
     async receive(req, res, buffer) {
         const serviceId = req.headers.sid
@@ -49,5 +49,3 @@ class EventReceiver extends EventEmitter {
         await new Promise(res => this.server.close(res))
     }
 }
-
-module.exports = EventReceiver

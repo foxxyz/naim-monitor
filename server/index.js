@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-const { Server: WSServer } = require('ws-plus')
-require('fresh-console')
-const { ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS } = require('argparse')
-const packageInfo = require('./package.json')
+import { Server as WSServer } from 'ws-plus'
+import 'fresh-console'
+import { ArgumentParser, ArgumentDefaultsHelpFormatter, SUPPRESS } from 'argparse'
+import packageInfo from './package.json' with { type: 'json' }
 
-const { Discovery } = require('./discover')
-const EventReceiver = require('./events')
+import { Discovery } from './discover.js'
+import EventReceiver from './events.js'
 
 // new NAIMDevice(args.naim_host)
 

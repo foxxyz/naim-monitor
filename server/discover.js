@@ -1,8 +1,8 @@
-const EventEmitter = require('events')
-const { Client: SSDPClient } = require('node-ssdp')
-const { UPnPDevice } = require('./device')
+import EventEmitter from 'events'
+import ssdp from 'node-ssdp'
+import { UPnPDevice } from './device.js'
 
-class Discovery extends EventEmitter {
+export class Discovery extends EventEmitter {
     constructor() {
         super()
         this.browser = null
@@ -10,7 +10,7 @@ class Discovery extends EventEmitter {
     }
     discover() {
         console.info('Scanning for devices...')
-        this.browser = new SSDPClient()
+        this.browser = new ssdp.Client()
         this.browser.on('response', this.processDevice.bind(this))
         this.browser.search('ssdp:all')
     }
@@ -23,8 +23,4 @@ class Discovery extends EventEmitter {
         if (!device) return
         this.emit('device', device)
     }
-}
-
-module.exports = {
-    Discovery
 }

@@ -1,8 +1,8 @@
-const EventEmitter = require('events')
-const { Parser: XMLParser } = require('xml2js')
+import EventEmitter from 'events'
+import { Parser as XMLParser } from 'xml2js'
 
-const EventReceiver = require('./events')
-const { formatTime } = require('./util')
+import EventReceiver from './events.js'
+import { formatTime } from './util.js'
 let GLOBAL_EVENT_RECEIVER
 
 const xmlParser = new XMLParser()
@@ -13,7 +13,7 @@ async function parseUpnpDescription(url) {
     return description.root.device[0]
 }
 
-class UPnPDevice {
+export class UPnPDevice {
     static async detect(descriptionUrl) {
         let info
         try {
@@ -49,7 +49,7 @@ class NaimDevice extends EventEmitter {
     }
 }
 
-class NaimGen1Device extends NaimDevice {
+export class NaimGen1Device extends NaimDevice {
     timers = {}
     constructor(...args) {
         super(...args)
@@ -151,7 +151,7 @@ class NaimGen1Device extends NaimDevice {
     }
 }
 
-class NaimGen2Device extends NaimDevice {
+export class NaimGen2Device extends NaimDevice {
     checkFrequency = 1000
     checkTimer
     async checkStatus() {
@@ -190,10 +190,4 @@ class NaimGen2Device extends NaimDevice {
 const DEVICES = {
     1: NaimGen1Device,
     2: NaimGen2Device,
-}
-
-module.exports = {
-    NaimGen1Device,
-    NaimGen2Device,
-    UPnPDevice,
 }

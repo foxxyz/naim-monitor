@@ -1,8 +1,8 @@
-const { Socket } = require('net')
-const { Builder: XMLBuilder, Parser: XMLParser } = require('xml2js')
+import { Socket } from 'net'
+import { Builder as XMLBuilder, Parser as XMLParser } from 'xml2js'
 
-const XMLStreamTransform = require('./parser')
-const { formatTime } = require('./util')
+import XMLStreamTransform from './parser'
+import { formatTime } from './util'
 
 function parsePlayTime(map) {
     const item = map[0].item[0]
@@ -15,7 +15,7 @@ function parsePlayItem(map) {
     console.info(`Now playing: ${title.$.string}`)
 }
 
-class NAIMController {
+export class NAIMController {
     constructor(host) {
         this.client = new Socket()
         this.client.connect(15555, host, this.onConnect.bind(this))
@@ -58,5 +58,3 @@ class NAIMController {
         this.client.write(this.generateCommand('ping'))
     }
 }
-
-module.exports = NAIMController

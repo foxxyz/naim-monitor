@@ -1,5 +1,7 @@
-const { MockDeviceGen1, MockDeviceGen2 } = require('./mocks')
-const { NaimGen1Device, NaimGen2Device } = require('../device')
+import assert from 'node:assert'
+import { afterEach, beforeEach, describe, it, mock } from 'node:test'
+import { MockDeviceGen1, MockDeviceGen2 } from './mocks.js'
+import { NaimGen1Device, NaimGen2Device } from '../device.js'
 
 const SERVICES_GEN_1 = [
     {
@@ -35,7 +37,7 @@ describe('Monitor (Gen 1 Devices)', () => {
         await fakeDevice.stop()
     })
     it('can subscribe to receive playback updates', async() => {
-        const fn = jest.fn()
+        const fn = mock.fn()
 
         const device = new NaimGen1Device({
             address: new URL(`http://${fakeDevice.host}/description.xml`),
@@ -58,7 +60,7 @@ describe('Monitor (Gen 1 Devices)', () => {
 
         await device.unsubscribe()
 
-        expect(fn).toHaveBeenCalledWith({
+        assert.deepEqual(fn.mock.calls[0].arguments[0], {
             artist: 'Princess',
             albumName: 'Turquoise Rain',
             trackName: 'I Would Lie 4U',
@@ -73,7 +75,7 @@ describe('Monitor (Gen 1 Devices)', () => {
             modelName: 'Mu-so',
             services: SERVICES_GEN_1,
         })
-        expect(device.description).toEqual('"Bedroom" (Mu-so type 20-004-0007)')
+        assert.equal(device.description, '"Bedroom" (Mu-so type 20-004-0007)')
     })
 })
 
@@ -111,7 +113,7 @@ describe('Monitor (Gen 2 Devices)', () => {
         await fakeDevice.stop()
     })
     it('can subscribe to receive playback updates', async() => {
-        const fn = jest.fn()
+        const fn = mock.fn()
 
         const device = new NaimGen2Device({
             address: new URL(`http://${fakeDevice.host}/f41662fe-fa97-4371-8bc9-88ff88ff88ff.xml`),
@@ -137,7 +139,7 @@ describe('Monitor (Gen 2 Devices)', () => {
 
         await device.unsubscribe()
 
-        expect(fn).toHaveBeenCalledWith({
+        assert.deepEqual(fn.mock.calls[0].arguments[0], {
             artist: 'Princess',
             albumName: 'Turquoise Rain',
             trackName: 'I Would Lie 4U',
@@ -152,6 +154,6 @@ describe('Monitor (Gen 2 Devices)', () => {
             modelName: 'Mu-so Qb',
             services: SERVICES_GEN_1,
         })
-        expect(device.description).toEqual('"Bedroom" (Mu-so Qb type 20-004-0034)')
+        assert.equal(device.description, '"Bedroom" (Mu-so Qb type 20-004-0034)')
     })
 })
