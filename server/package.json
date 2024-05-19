@@ -4,33 +4,28 @@
   "description": "NAIM Monitor Server Process",
   "scripts": {
     "start": "node index.js",
-    "lint": "eslint .",
+    "lint": "eslint",
     "test": "node --test  --experimental-test-coverage test/*.test.js"
   },
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/foxxyz/naim-monitor.git"
+    "url": "git+https://github.com/foxxyz/naim-monitor.git"
   },
   "author": "Ivo Janssen <hello@ivo.la>",
   "license": "MIT",
   "devDependencies": {
-    "@appliedminds/eslint-config": "^1.6.0",
-    "eslint": "^8.56.0"
+    "@appliedminds/eslint-config": "^2.0.1",
+    "eslint": "^9.3.0"
   },
   "dependencies": {
     "argparse": "^2.0.1",
     "concat-stream": "^2.0.0",
     "fresh-console": "^2.0.0",
-    "html-entities": "^2.4.0",
+    "html-entities": "^2.5.2",
     "network-address": "^1.1.2",
     "node-ssdp": "^4.0.1",
-    "ws-plus": "^6.0.2",
+    "ws-plus": "^6.0.4",
     "xml2js": "^0.6.2"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@appliedminds"
-    ]
   }
 }
