@@ -5,37 +5,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint --ext .js,.vue src"
+    "lint": "eslint src"
   },
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/foxxyz/naim-monitor.git"
+    "url": "git+https://github.com/foxxyz/naim-monitor.git"
   },
   "author": "Ivo Janssen <hello@ivo.la>",
   "license": "MIT",
   "devDependencies": {
-    "@appliedminds/eslint-config": "^1.6.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-vue": "^9.19.2",
-    "sass": "^1.69.7"
+    "@appliedminds/eslint-config": "^2.0.1",
+    "eslint": "^9.3.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "sass": "^1.77.2"
   },
   "dependencies": {
-    "@vitejs/plugin-vue": "^5.0.2",
-    "album-image": "^1.0.6",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "album-image": "^1.0.7",
     "randomcolor": "^0.6.2",
-    "vite": "^5.0.11",
-    "vue": "^3.4.5",
-    "vue-router": "^4.2.5",
-    "ws-plus": "^6.0.2"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@appliedminds",
-      "@appliedminds/eslint-config/vue"
-    ],
-    "globals": {
-      "__APP_VERSION__": true
-    }
+    "vite": "^5.2.11",
+    "vue": "^3.4.27",
+    "vue-router": "^4.3.2",
+    "ws-plus": "^6.0.4"
   }
 }
