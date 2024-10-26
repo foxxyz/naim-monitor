@@ -3,6 +3,7 @@
         <div class="album-art">
             <div class="album-art-wrapper">
                 <img v-if="albumArt" :src="albumArt">
+                <div v-else class="art-loading" />
                 <div v-if="loading" class="meta">
                     <p>Awaiting Playback Info...</p>
                 </div>
@@ -38,8 +39,27 @@ const device = reactive({
     name: ''
 })
 
+let aborter
+async function loadAlbumArt({ artist, albumName }) {
+    // Abort previous request if needed
+    if (aborter) aborter.abort('Aborted')
+
+    // Create a new aborter
+    aborter = new AbortController()
+    const signal = aborter.signal
+
+    let src
+    try {
+        src = await getAlbumImage({ artist, album: albumName, signal })
+    } catch (e) {
+        if (e === 'Aborted') return
+        console.warn(`No album art results for ${artist} and/or ${albumName}!`)
+    }
+    albumArt.value = src
+}
+
 listen({
-    async trackChange(info) {
+    trackChange(info) {
         // Skip if no artist given
         if (!info.artist) return
         // Same track called for possibly a different device - ignore
@@ -47,18 +67,8 @@ listen({
 
         // Try getting album art
         if (info.artist !== track.artist || info.albumName !== track.albumName) {
-            let src
-            try {
-                src = await getAlbumImage({ artist: info.artist, album: info.albumName })
-            } catch (e) {
-                // Try just album name if no results
-                try {
-                    src = await getAlbumImage({ album: info.albumName })
-                } catch (e) {
-                    console.warn(`No album art results for ${info.artist}!`)
-                }
-            }
-            albumArt.value = src
+            // Load asychronously
+            loadAlbumArt(info)
         }
         Object.assign(track, info)
         device.name = info.device
@@ -76,6 +86,11 @@ watch(track, ({ artist, trackName }) => {
 </script>
 
 <style lang="sass">
+@property --angle
+    syntax: '<angle>'
+    inherits: false
+    initial-value: 180deg
+
 main.home
     display: flex
     justify-content: center
@@ -113,6 +128,14 @@ main.home
         align-items: center
         height: 100%
         background-color: #111
+        box-shadow: .1em .1em .5em rgba(0, 0, 0, .9)
+
+    .art-loading
+        background: conic-gradient(from var(--angle), black, #222)
+        width: 100%
+        height: 100%
+        animation: loading-gradient 2s infinite linear
+
     .device
         position: absolute
         right: 0
@@ -170,13 +193,19 @@ main.home
 
 @keyframes showoffX
     0%
-        transform: rotateX(-5deg)
+        transform: rotateX(-10deg)
     100%
-        transform: rotateX(5deg)
+        transform: rotateX(10deg)
 
 @keyframes showoffY
     0%
-        transform: rotateY(-5deg)
+        transform: rotateY(-10deg)
     100%
-        transform: rotateY(5deg)
+        transform: rotateY(10deg)
+
+@keyframes loading-gradient
+    from
+        --angle: 0deg
+    to
+        --angle: 360deg
 </style>
